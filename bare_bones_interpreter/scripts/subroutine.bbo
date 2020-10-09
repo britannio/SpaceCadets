@@ -1,0 +1,10 @@
+clear X;
+
+// Defines the subroutine
+addToX() do; 
+    incr X;
+    incr X;
+end;
+
+// Invokes the subroutine
+addToX();

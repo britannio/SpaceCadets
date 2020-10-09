@@ -1,0 +1,11 @@
+// Single line comment
+
+/* 
+Comment
+Spanning
+Multiple
+Lines
+*/
+
+clear X;
+incr X;

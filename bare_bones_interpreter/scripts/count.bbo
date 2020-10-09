@@ -1,0 +1,3 @@
+clear X;
+while X not 5 do;
+    incr X;
