@@ -127,8 +127,8 @@ public class Interpreter {
     private void outputVariables() {
         System.out.println("┌───────────┐");
         System.out.println("│ Variables │");
-        System.out.println("├───────────┘");
-        variables.forEach( (key,value) -> System.out.println("│ " + key + "—" + value));
+        System.out.println("├─────┬─────┘");
+        variables.forEach( (key,value) -> System.out.println("│ " + key + "=" + value + " │"));
     }
 
 }

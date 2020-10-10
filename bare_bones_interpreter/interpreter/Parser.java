@@ -28,47 +28,52 @@ public class Parser {
         scriptLines = removeEmptyLines(scriptLines);
         scriptLines = removeLeadingWhitespace(scriptLines);
 
-        return parseLines(scriptLines);
+        final ListIterator<String> iterator = scriptLines.listIterator();
+
+        return parseLines(iterator);
     }
 
-    private List<BBStatement> parseLines(List<String> lines) {
+    private List<BBStatement> parseLines(ListIterator<String> iterator) {
         final List<BBStatement> statements = new ArrayList<BBStatement>();
-
-        final ListIterator<String> iterator = lines.listIterator();
 
         while (iterator.hasNext()) {
             String line = iterator.next();
 
-            final IncrementMatcher incrementMatcher = new IncrementMatcher(line);
-            final DecrementMatcher decrementMatcher = new DecrementMatcher(line);
-            final ClearMatcher clearMatcher = new ClearMatcher(line);
-            final WhileMatcher whileMatcher = new WhileMatcher(line);
-            final SubroutineDefinitionMatcher subroutineDefinitionMatcher = new SubroutineDefinitionMatcher(line);
-            final SubroutineMatcher subroutineMatcher = new SubroutineMatcher(line);
-
-            if (clearMatcher.matches) {
-                statements.add(clearMatcher.statement());
-
-            } else if (incrementMatcher.matches) {
-                statements.add(incrementMatcher.statement());
-
-            } else if (decrementMatcher.matches) {
-                statements.add(decrementMatcher.statement());
-
-            } else if (whileMatcher.matchesStart) {
-                statements.add(parseWhileLoop(whileMatcher.condition, iterator));
-
-            } else if (subroutineDefinitionMatcher.matchesStart) {
-                statements.add(parseSubroutine(subroutineDefinitionMatcher.name, iterator));
-
-            } else if (subroutineMatcher.matches) {
-                statements.add(subroutineMatcher.statement());
-            } else {
-
-            }
+            statements.add(parseLine(line, iterator));
         }
 
         return statements;
+    }
+
+    private BBStatement parseLine(String line, ListIterator<String> iterator) {
+        final IncrementMatcher incrementMatcher = new IncrementMatcher(line);
+        final DecrementMatcher decrementMatcher = new DecrementMatcher(line);
+        final ClearMatcher clearMatcher = new ClearMatcher(line);
+        final WhileMatcher whileMatcher = new WhileMatcher(line);
+        final SubroutineDefinitionMatcher subroutineDefinitionMatcher = new SubroutineDefinitionMatcher(line);
+        final SubroutineMatcher subroutineMatcher = new SubroutineMatcher(line);
+
+        if (clearMatcher.matches) {
+            return clearMatcher.statement();
+
+        } else if (incrementMatcher.matches) {
+            return incrementMatcher.statement();
+
+        } else if (decrementMatcher.matches) {
+            return decrementMatcher.statement();
+
+        } else if (whileMatcher.matchesStart) {
+            return parseWhileLoop(whileMatcher.condition, iterator);
+
+        } else if (subroutineDefinitionMatcher.matchesStart) {
+            return parseSubroutine(subroutineDefinitionMatcher.name, iterator);
+
+        } else if (subroutineMatcher.matches) {
+            return subroutineMatcher.statement();
+
+        } else {
+            return null;
+        }
     }
 
     private WhileStatement parseWhileLoop(BoolCondition condition, ListIterator<String> iterator) {
@@ -80,30 +85,10 @@ public class Parser {
 
             final WhileMatcher whileMatcher = new WhileMatcher(line);
 
-            if (whileMatcher.matchesStart) {
-                statements.add(parseWhileLoop(whileMatcher.condition, iterator));
-            } else if (whileMatcher.matchesEnd) {
+            if (whileMatcher.matchesEnd) {
                 break;
             } else {
-                final IncrementMatcher incrementMatcher = new IncrementMatcher(line);
-                final DecrementMatcher decrementMatcher = new DecrementMatcher(line);
-                final ClearMatcher clearMatcher = new ClearMatcher(line);
-                final SubroutineDefinitionMatcher subroutineDefinitionMatcher = new SubroutineDefinitionMatcher(line);
-                final SubroutineMatcher subroutineMatcher = new SubroutineMatcher(line);
-
-                if (clearMatcher.matches) {
-                    statements.add(clearMatcher.statement());
-                } else if (incrementMatcher.matches) {
-                    statements.add(incrementMatcher.statement());
-                } else if (decrementMatcher.matches) {
-                    statements.add(decrementMatcher.statement());
-                } else if (subroutineDefinitionMatcher.matchesStart) {
-                    statements.add(parseSubroutine(subroutineDefinitionMatcher.name, iterator));
-                } else if (subroutineMatcher.matches) {
-                    statements.add(subroutineMatcher.statement());
-                } else {
-
-                }
+                statements.add(parseLine(line, iterator));
             }
 
         }
@@ -119,31 +104,10 @@ public class Parser {
 
             final SubroutineDefinitionMatcher matcher = new SubroutineDefinitionMatcher(line);
 
-            if (matcher.matchesStart) {
-                statements.add(parseSubroutine(matcher.name, iterator));
-            } else if (matcher.matchesEnd) {
+            if (matcher.matchesEnd) {
                 break;
             } else {
-                final IncrementMatcher incrementMatcher = new IncrementMatcher(line);
-                final DecrementMatcher decrementMatcher = new DecrementMatcher(line);
-                final ClearMatcher clearMatcher = new ClearMatcher(line);
-                final WhileMatcher whileMatcher = new WhileMatcher(line);
-                final SubroutineMatcher subroutineMatcher = new SubroutineMatcher(line);
-
-
-                if (clearMatcher.matches) {
-                    statements.add(clearMatcher.statement());
-                } else if (incrementMatcher.matches) {
-                    statements.add(incrementMatcher.statement());
-                } else if (decrementMatcher.matches) {
-                    statements.add(decrementMatcher.statement());
-                }else if (whileMatcher.matchesStart) {
-                    statements.add(parseWhileLoop(whileMatcher.condition, iterator));
-                } else if (subroutineMatcher.matches) {
-                    statements.add(subroutineMatcher.statement());
-                } else {
-
-                }
+                statements.add(parseLine(line, iterator));
             }
 
         }
@@ -172,7 +136,9 @@ public class Parser {
     }
 
     private String readFile(String filename) {
-        final File file = new File("/Users/britannio/Software/Java/SCChallengeBareBones/src/scripts/" + filename);
+        // TODO use a relative path
+        final File file = new File(
+                "/Users/britannio/Software/Java/SpaceCadets/bare_bones_interpreter/scripts/" + filename);
 
         try {
             final BufferedReader reader = new BufferedReader(new FileReader(file));

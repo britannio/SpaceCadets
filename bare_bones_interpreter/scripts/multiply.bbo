@@ -1,4 +1,4 @@
-// Multiplies X(3) by Y(2) and stores the result in Z
+// Multiplies X(2) by Y(3) and stores the result in Z
 
 clear X;
 incr X;
